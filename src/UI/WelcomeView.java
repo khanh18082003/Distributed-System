@@ -95,7 +95,8 @@ public class WelcomeView extends JFrame {
         // Set the request to get the list of users from the server
         request = Execution.GET_LIST.getRequest() + Constants.BRANCH_MAP.get(branchCombobox.getSelectedItem());
       }
-
+      System.out.println(request);
+      
       try {
         client.startConnection(Constants.SERVER_ADDRESS, Constants.PORT_NUMBER);
         client.setDataToSend(request);

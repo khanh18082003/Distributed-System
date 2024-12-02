@@ -27,21 +27,20 @@ public class Client {
 
   public void setDataToSend(Object request) throws IOException {
     this.request = request;
-    System.out.println(this.request);
+    System.out.println(this.request.toString());
   }
 
   public void startConnection(String host, int port) throws IOException {
     System.out.println("Begin connect!");
     clientSocket = new Socket(host, port);
-    System.out.println("Connect Successfully!");
-
-    in = new ObjectInputStream(clientSocket.getInputStream());
-    out = new ObjectOutputStream(clientSocket.getOutputStream());
+    System.out.println("Connect: " + clientSocket.isConnected());
+    System.out.println(clientSocket.getPort());
   }
 
   public void sendDataToServer() throws IOException {
 
     //Gửi chuỗi ký tự tới Server thông qua outputStream đã nối với Socket (ở trên)
+    out = new ObjectOutputStream(clientSocket.getOutputStream());
     out.writeObject(request);
     out.flush();
     System.out.println("TO SERVER " + clientSocket.getInetAddress().getHostAddress() + ": " + request);
@@ -50,6 +49,7 @@ public class Client {
   public Object readDataFromServer() throws IOException, ClassNotFoundException {
 
     //print kết qua ra màn hình
+    in = new ObjectInputStream(clientSocket.getInputStream());
     System.out.println("FROM SERVER " + clientSocket.getInetAddress().getHostAddress());
     return in.readObject();
   }
