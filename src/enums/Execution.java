@@ -7,7 +7,7 @@ public enum Execution {
   DELETE_USER("DELETE_"),
   SAVE_USER("SAVE_");
 
-  private String request;
+  private final String request;
 
   Execution(String request) {
     this.request = request;

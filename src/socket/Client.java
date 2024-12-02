@@ -8,39 +8,46 @@ import javax.swing.JOptionPane;
 
 public class Client {
 
-  private String request;
+  private Object request;
   private Socket clientSocket;
-  private final String host;
-  private final int port;
   private ObjectInputStream in;
   private ObjectOutputStream out;
+  private static Client instance;
 
-  //Tạo Inputstream(từ bàn phím)
-  public Client(String host, int port) {
-    this.port = port;
-    this.host = host;
-    System.out.println("Init success " + this.host + " " + this.port);
+  private Client() {
+
   }
 
-  public void setDataToSend(String request) throws IOException {
+  public static Client getInstance() {
+    if (instance == null) {
+      instance = new Client();
+    }
+    return instance;
+  }
+
+  public void setDataToSend(Object request) throws IOException {
     this.request = request;
     System.out.println(this.request);
   }
 
-  public void sendDataToServer() throws IOException {
-    System.out.println("Begin connect");
-    //Tạo socket cho client kết nối đến server qua ID address và port number
+  public void startConnection(String host, int port) throws IOException {
+    System.out.println("Begin connect!");
     clientSocket = new Socket(host, port);
-    System.out.println("Connect success");
+    System.out.println("Connect Successfully!");
+
+    in = new ObjectInputStream(clientSocket.getInputStream());
     out = new ObjectOutputStream(clientSocket.getOutputStream());
+  }
+
+  public void sendDataToServer() throws IOException {
+
     //Gửi chuỗi ký tự tới Server thông qua outputStream đã nối với Socket (ở trên)
-    out.writeBytes(request + '\n');
+    out.writeObject(request);
     out.flush();
     System.out.println("TO SERVER " + clientSocket.getInetAddress().getHostAddress() + ": " + request);
   }
 
   public Object readDataFromServer() throws IOException, ClassNotFoundException {
-    in = new ObjectInputStream(clientSocket.getInputStream());
 
     //print kết qua ra màn hình
     System.out.println("FROM SERVER " + clientSocket.getInetAddress().getHostAddress());

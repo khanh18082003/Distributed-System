@@ -5,9 +5,15 @@ import enums.Constants;
 import enums.Execution;
 import java.awt.Dimension;
 import java.io.IOException;
+import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -39,12 +45,16 @@ public class WelcomeView extends JFrame {
   private JTextField tfLastName;
   private JTextField tfBranch;
   private JTextField tfDob;
-  private Client client;
+  private final Client client;
   private List<User> users;
+  private AddUserView addUserView;
 
   private void init() {
     Constants.BRANCH_MAP.forEach((key, value) -> branchCombobox.addItem(key));
     branchCombobox.setPreferredSize(new Dimension(200, 30));
+
+    deleteButton.setEnabled(false);
+    saveButton.setEnabled(false);
   }
 
   public WelcomeView() {
@@ -57,6 +67,9 @@ public class WelcomeView extends JFrame {
 
     // Add a list selection listener to the userList
     userList.getSelectionModel().addListSelectionListener(e -> {
+      deleteButton.setEnabled(true);
+      saveButton.setEnabled(true);
+
       int index = userList.getSelectedRow();
       System.out.println(index);
       if (index >= 0) {
@@ -68,20 +81,16 @@ public class WelcomeView extends JFrame {
         tfDob.setText(user.getDob().toString());
       }
     });
-
     // Create a new instance of the Client class
-    client = new Client(Constants.SERVER_ADDRESS, Constants.PORT_NUMBER);
+    client = Client.getInstance();
 
     // Add an action listener to the getListBtn button
     getListBtn.addActionListener(e -> {
-      // Get the selected branch from the branchCombobox
-      String branch = Constants.BRANCH_MAP.get(branchCombobox.getSelectedItem());
-
       // Set the request to get the list of users from the server
-      String request = Execution.GET_LIST.getRequest() + branch;
+      String request = Execution.GET_LIST.getRequest() + Constants.BRANCH_MAP.get(branchCombobox.getSelectedItem());
 
-      // Send the request to the server and read the response
       try {
+        client.startConnection(Constants.SERVER_ADDRESS, Constants.PORT_NUMBER);
         client.setDataToSend(request);
         client.sendDataToServer();
         users = (List<User>) client.readDataFromServer();
@@ -116,12 +125,25 @@ public class WelcomeView extends JFrame {
     saveButton.addActionListener(e -> {
       // Get the selected branch from the branchCombobox
       String branch = Constants.BRANCH_MAP.get(branchCombobox.getSelectedItem());
-
+      User user = new User();
+      user.setId(Integer.parseInt(tfId.getText()));
+      user.setFirstName(tfFirstName.getText());
+      user.setLastName((tfLastName.getText()));
+      user.setMaCN(tfBranch.getText());
+      SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+      try {
+        user.setDob(new Date(format.parse(tfDob.getText()).getTime()));
+      } catch (ParseException ex) {
+        throw new RuntimeException(ex);
+      }
       // Set the request to save the list of users to the server
-      String request = Execution.SAVE_USER.getRequest() + branch;
-
+      String message = Execution.SAVE_USER.getRequest() + branch;
+      Map<String, Object> request = new HashMap<>();
+      request.put("message", message);
+      request.put("data", user);
       // Send the request to the server and read the response
       try {
+        client.startConnection(Constants.SERVER_ADDRESS, Constants.PORT_NUMBER);
         client.setDataToSend(request);
         client.sendDataToServer();
         client.readDataFromServer();
@@ -138,19 +160,24 @@ public class WelcomeView extends JFrame {
     deleteButton.addActionListener(e -> {
       // Get the selected branch from the branchCombobox
       String branch = Constants.BRANCH_MAP.get(branchCombobox.getSelectedItem());
-
-      // Set the request to delete the list of users from the server
-      String request = Execution.DELETE_USER.getRequest() + branch;
-
+      int id = (Integer) userList.getValueAt(userList.getSelectedRow(), 0);
+      System.out.println(id);
       // Send the request to the server and read the response
+      Map<String, Object> request = new HashMap<>();
+      request.put("message", Execution.DELETE_USER.getRequest() + Objects.requireNonNull(
+          branchCombobox.getSelectedItem()).toString());
+      request.put("data", id);
+      Client client = Client.getInstance();
+
       try {
+        client.startConnection(Constants.SERVER_ADDRESS, Constants.PORT_NUMBER);
         client.setDataToSend(request);
         client.sendDataToServer();
-        client.readDataFromServer();
+
       } catch (IOException ex) {
-        JOptionPane.showMessageDialog(null, "Server is not available");
-      } catch (ClassNotFoundException ex) {
-        JOptionPane.showMessageDialog(null, "Cannot read data from server");
+        throw new RuntimeException(ex);
+      } finally {
+        client.closeConnection();
       }
     });
 
@@ -158,20 +185,8 @@ public class WelcomeView extends JFrame {
     addButton.addActionListener(e -> {
       // Get the selected branch from the branchCombobox
       String branch = Constants.BRANCH_MAP.get(branchCombobox.getSelectedItem());
+      addUserView = new AddUserView(Constants.BRANCH_MAP.get(branchCombobox.getSelectedItem()));
 
-      // Set the request to add a new user to the server
-      String request = Execution.ADD_USER.getRequest() + branch;
-
-      // Send the request to the server and read the response
-      try {
-        client.setDataToSend(request);
-        client.sendDataToServer();
-        client.readDataFromServer();
-      } catch (IOException ex) {
-        JOptionPane.showMessageDialog(null, "Server is not available");
-      } catch (ClassNotFoundException ex) {
-        JOptionPane.showMessageDialog(null, "Cannot read data from server");
-      }
     });
   }
 }
