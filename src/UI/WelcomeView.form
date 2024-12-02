@@ -73,6 +73,12 @@
                   <font size="16" style="1"/>
                 </properties>
               </component>
+              <component id="a11e4" class="javax.swing.JCheckBox" binding="checkBoxPanel">
+                <constraints/>
+                <properties>
+                  <text value="Chọn 2 cơ sở"/>
+                </properties>
+              </component>
             </children>
           </grid>
         </children>

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -45,6 +46,7 @@ public class WelcomeView extends JFrame {
   private JTextField tfLastName;
   private JTextField tfBranch;
   private JTextField tfDob;
+  private JCheckBox checkBoxPanel;
   private final Client client;
   private List<User> users;
   private AddUserView addUserView;
@@ -86,8 +88,13 @@ public class WelcomeView extends JFrame {
 
     // Add an action listener to the getListBtn button
     getListBtn.addActionListener(e -> {
-      // Set the request to get the list of users from the server
-      String request = Execution.GET_LIST.getRequest() + Constants.BRANCH_MAP.get(branchCombobox.getSelectedItem());
+      String request;
+      if (checkBoxPanel.isSelected()) {
+        request = Execution.GET_LIST.getRequest();
+      }else {
+        // Set the request to get the list of users from the server
+        request = Execution.GET_LIST.getRequest() + Constants.BRANCH_MAP.get(branchCombobox.getSelectedItem());
+      }
 
       try {
         client.startConnection(Constants.SERVER_ADDRESS, Constants.PORT_NUMBER);
