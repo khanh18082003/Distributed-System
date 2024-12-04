@@ -1,5 +1,7 @@
 package socket;
 
+import dto.request.Request;
+import dto.response.Response;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -8,7 +10,7 @@ import javax.swing.JOptionPane;
 
 public class Client {
 
-  private Object request;
+  private Request request;
   private Socket clientSocket;
   private ObjectInputStream in;
   private ObjectOutputStream out;
@@ -25,7 +27,7 @@ public class Client {
     return instance;
   }
 
-  public void setDataToSend(Object request) throws IOException {
+  public void setDataToSend(Request request) throws IOException {
     this.request = request;
     System.out.println(this.request.toString());
   }
@@ -43,15 +45,15 @@ public class Client {
     out = new ObjectOutputStream(clientSocket.getOutputStream());
     out.writeObject(request);
     out.flush();
-    System.out.println("TO SERVER " + clientSocket.getInetAddress().getHostAddress() + ": " + request);
+    System.out.println("TO SERVER " + clientSocket.getInetAddress().getHostAddress() + ": " + request.getMessage());
   }
 
-  public Object readDataFromServer() throws IOException, ClassNotFoundException {
+  public Response readDataFromServer() throws IOException, ClassNotFoundException {
 
     //print kết qua ra màn hình
     in = new ObjectInputStream(clientSocket.getInputStream());
     System.out.println("FROM SERVER " + clientSocket.getInetAddress().getHostAddress());
-    return in.readObject();
+    return (Response) in.readObject();
   }
 
   public void closeConnection() {

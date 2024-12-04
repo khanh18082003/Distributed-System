@@ -1,11 +1,11 @@
-package enums;
+package common;
 
 public enum Execution {
 
   GET_LIST("GET_LIST_"),
-  ADD_USER("ADD_"),
-  DELETE_USER("DELETE_"),
-  SAVE_USER("SAVE_");
+  ADD_USER("ADD_USER_"),
+  DELETE_USER("DELETE_USER_"),
+  SAVE_USER("SAVE_USER_");
 
   private final String request;
 

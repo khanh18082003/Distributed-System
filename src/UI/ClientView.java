@@ -1,19 +1,15 @@
 package UI;
 
 import com.springMVC.entity.User;
-import enums.Constants;
-import enums.Execution;
+import dto.request.Request;
+import dto.response.Response;
+import common.Constants;
+import common.Execution;
 import java.awt.Dimension;
 import java.io.IOException;
-import java.sql.Date;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -26,7 +22,7 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import socket.Client;
 
-public class WelcomeView extends JFrame {
+public class ClientView extends JFrame {
 
   private JPanel contentPane;
   private JPanel northPanel;
@@ -44,15 +40,19 @@ public class WelcomeView extends JFrame {
   private JTextField tfBranch;
   private JTextField tfDob;
   private JCheckBox checkBoxPanel;
+  private JButton createUserButton;
+  private JButton deleteUserButton;
   private final Client client;
   private List<User> users;
+  private CreateUserForm createUserForm;
 
   private void init() {
     Constants.BRANCH_MAP.forEach((key, value) -> branchCombobox.addItem(key));
     branchCombobox.setPreferredSize(new Dimension(200, 30));
+    deleteUserButton.setEnabled(false);
   }
 
-  public WelcomeView() {
+  public ClientView() {
     super(Constants.TITLE);
     init();
     setContentPane(contentPane);
@@ -78,12 +78,13 @@ public class WelcomeView extends JFrame {
 
     // Add an action listener to the getListBtn button
     getListBtn.addActionListener(e -> {
-      String request;
+      Request request = new Request();
+
       if (checkBoxPanel.isSelected()) {
-        request = Execution.GET_LIST.getRequest();
+        request.setMessage(Execution.GET_LIST.getRequest());
       }else {
         // Set the request to get the list of users from the server
-        request = Execution.GET_LIST.getRequest() + Constants.BRANCH_MAP.get(branchCombobox.getSelectedItem());
+        request.setMessage(Execution.GET_LIST.getRequest() + Constants.BRANCH_MAP.get(branchCombobox.getSelectedItem()));
       }
       System.out.println(request);
       
@@ -91,7 +92,8 @@ public class WelcomeView extends JFrame {
         client.startConnection(Constants.SERVER_ADDRESS, Constants.PORT_NUMBER);
         client.setDataToSend(request);
         client.sendDataToServer();
-        users = (List<User>) client.readDataFromServer();
+        Response response = client.readDataFromServer();
+        users = (List<User>) response.getData();
       } catch (IOException ex) {
         JOptionPane.showMessageDialog(null, "Server is not available");
       } catch (ClassNotFoundException ex) {
@@ -113,9 +115,39 @@ public class WelcomeView extends JFrame {
         }
         if (model.getRowCount() > 0) {
           userList.setRowSelectionInterval(0, 0);
+          deleteUserButton.setEnabled(true);
         }
       }else {
         JOptionPane.showMessageDialog(null, "No data found");
+      }
+    });
+
+    createUserButton.addActionListener(e -> {
+      createUserForm = new CreateUserForm(Constants.BRANCH_MAP.get(branchCombobox.getSelectedItem()));
+
+    });
+
+    deleteUserButton.addActionListener(e -> {
+      Request request = new Request();
+      request.setMessage(Execution.DELETE_USER.getRequest() + Constants.BRANCH_MAP.get(branchCombobox.getSelectedItem()));
+      System.out.println(tfId.getText());
+      request.setData(tfId.getText());
+      System.out.println(request.toString());
+      String message = null;
+      ((DefaultTableModel)userList.getModel()).removeRow(userList.getSelectedRow());
+      try {
+        client.startConnection(Constants.SERVER_ADDRESS, Constants.PORT_NUMBER);
+        client.setDataToSend(request);
+        client.sendDataToServer();
+        Response response = client.readDataFromServer();
+        message = response.getMessage();
+
+      } catch (IOException ex) {
+        JOptionPane.showMessageDialog(null, "Server is not available");
+      } catch (ClassNotFoundException ex) {
+        throw new RuntimeException(ex);
+      } finally {
+        client.closeConnection();
       }
     });
   }

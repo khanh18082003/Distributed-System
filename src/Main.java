@@ -1,11 +1,11 @@
-import UI.WelcomeView;
+import UI.ClientView;
 
 public class Main {
 
   public static void main(String[] args) {
 
     // Create a new instance of the WelcomeView class
-    WelcomeView welcomeView = new WelcomeView();
+    ClientView welcomeView = new ClientView();
     welcomeView.setVisible(true);
   }
 }
