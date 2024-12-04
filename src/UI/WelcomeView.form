@@ -23,27 +23,6 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="b2494" class="javax.swing.JButton" binding="addButton">
-                <constraints/>
-                <properties>
-                  <icon value="resouce/statics/add-user.png"/>
-                  <text value="Add"/>
-                </properties>
-              </component>
-              <component id="cbf10" class="javax.swing.JButton" binding="deleteButton" default-binding="true">
-                <constraints/>
-                <properties>
-                  <icon value="resouce/statics/user.png"/>
-                  <text value="Delete"/>
-                </properties>
-              </component>
-              <component id="2ab13" class="javax.swing.JButton" binding="saveButton" default-binding="true">
-                <constraints/>
-                <properties>
-                  <icon value="resouce/statics/people.png"/>
-                  <text value="Save"/>
-                </properties>
-              </component>
               <component id="1baaf" class="javax.swing.JButton" binding="getListBtn">
                 <constraints/>
                 <properties>
@@ -96,7 +75,7 @@
               </grid>
             </constraints>
             <properties>
-              <dividerLocation value="332"/>
+              <dividerLocation value="430"/>
               <dividerSize value="5"/>
               <enabled value="true"/>
             </properties>
@@ -143,7 +122,9 @@
                         <preferred-size width="150" height="-1"/>
                       </grid>
                     </constraints>
-                    <properties/>
+                    <properties>
+                      <editable value="false"/>
+                    </properties>
                   </component>
                   <component id="26083" class="javax.swing.JTextField" binding="tfFirstName">
                     <constraints>

@@ -31,9 +31,6 @@ public class WelcomeView extends JFrame {
   private JPanel contentPane;
   private JPanel northPanel;
   private JPanel headerPanel;
-  private JButton deleteButton;
-  private JButton saveButton;
-  private JButton addButton;
   private JButton getListBtn;
   private JPanel footerPanel;
   private JComboBox<String> branchCombobox;
@@ -49,14 +46,10 @@ public class WelcomeView extends JFrame {
   private JCheckBox checkBoxPanel;
   private final Client client;
   private List<User> users;
-  private AddUserView addUserView;
 
   private void init() {
     Constants.BRANCH_MAP.forEach((key, value) -> branchCombobox.addItem(key));
     branchCombobox.setPreferredSize(new Dimension(200, 30));
-
-    deleteButton.setEnabled(false);
-    saveButton.setEnabled(false);
   }
 
   public WelcomeView() {
@@ -69,9 +62,6 @@ public class WelcomeView extends JFrame {
 
     // Add a list selection listener to the userList
     userList.getSelectionModel().addListSelectionListener(e -> {
-      deleteButton.setEnabled(true);
-      saveButton.setEnabled(true);
-
       int index = userList.getSelectedRow();
       System.out.println(index);
       if (index >= 0) {
@@ -127,74 +117,6 @@ public class WelcomeView extends JFrame {
       }else {
         JOptionPane.showMessageDialog(null, "No data found");
       }
-    });
-
-    // Add an action listener to the saveButton button
-    saveButton.addActionListener(e -> {
-      // Get the selected branch from the branchCombobox
-      String branch = Constants.BRANCH_MAP.get(branchCombobox.getSelectedItem());
-      User user = new User();
-      user.setId(Integer.parseInt(tfId.getText()));
-      user.setFirstName(tfFirstName.getText());
-      user.setLastName((tfLastName.getText()));
-      user.setMaCN(tfBranch.getText());
-      SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-      try {
-        user.setDob(new Date(format.parse(tfDob.getText()).getTime()));
-      } catch (ParseException ex) {
-        throw new RuntimeException(ex);
-      }
-      // Set the request to save the list of users to the server
-      String message = Execution.SAVE_USER.getRequest() + branch;
-      Map<String, Object> request = new HashMap<>();
-      request.put("message", message);
-      request.put("data", user);
-      // Send the request to the server and read the response
-      try {
-        client.startConnection(Constants.SERVER_ADDRESS, Constants.PORT_NUMBER);
-        client.setDataToSend(request);
-        client.sendDataToServer();
-        client.readDataFromServer();
-      } catch (IOException ex) {
-        JOptionPane.showMessageDialog(null, "Server is not available");
-      } catch (ClassNotFoundException ex) {
-        JOptionPane.showMessageDialog(null, "Cannot read data from server");
-      } finally {
-        client.closeConnection();
-      }
-    });
-
-    // Add an action listener to the deleteButton button
-    deleteButton.addActionListener(e -> {
-      // Get the selected branch from the branchCombobox
-      String branch = Constants.BRANCH_MAP.get(branchCombobox.getSelectedItem());
-      int id = (Integer) userList.getValueAt(userList.getSelectedRow(), 0);
-      System.out.println(id);
-      // Send the request to the server and read the response
-      Map<String, Object> request = new HashMap<>();
-      request.put("message", Execution.DELETE_USER.getRequest() + Objects.requireNonNull(
-          branchCombobox.getSelectedItem()).toString());
-      request.put("data", id);
-      Client client = Client.getInstance();
-
-      try {
-        client.startConnection(Constants.SERVER_ADDRESS, Constants.PORT_NUMBER);
-        client.setDataToSend(request);
-        client.sendDataToServer();
-
-      } catch (IOException ex) {
-        throw new RuntimeException(ex);
-      } finally {
-        client.closeConnection();
-      }
-    });
-
-    // Add an action listener to the addButton button
-    addButton.addActionListener(e -> {
-      // Get the selected branch from the branchCombobox
-      String branch = Constants.BRANCH_MAP.get(branchCombobox.getSelectedItem());
-      addUserView = new AddUserView(Constants.BRANCH_MAP.get(branchCombobox.getSelectedItem()));
-
     });
   }
 }
